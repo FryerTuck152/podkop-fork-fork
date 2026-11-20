@@ -343,7 +343,7 @@ export namespace Forkop {
     // The error logged since the last start or stop that went through.
     last_error: string;
     // The core as its binary reports itself: `binary` its version, `version` that version when it
-    // is sing-box-forkop's, the package's variant while the binary is that build, and why Forkop
+    // is sing-box-extended's, the package's variant while the binary is that build, and why Forkop
     // cannot run on it.
     core: {
       installed: boolean;

@@ -129,13 +129,13 @@ function unavailable_reason(feature, present) {
 function core_problem(present) {
     present ??= tags();
     if (present == null)
-        return "Failed to read the tags sing-box was built with from 'sing-box version'. Reinstall sing-box-forkop";
+        return "Failed to read the tags sing-box was built with from 'sing-box version'. Reinstall sing-box-extended";
     if (!available(REQUIRED, present))
-        return "sing-box was built without with_clash_api. Forkop runs its dashboard, groups, latency tests and subnet sync through the Clash API and cannot start without it. Install a sing-box-forkop package or a core built with with_clash_api";
+        return "sing-box was built without with_clash_api. Forkop runs its dashboard, groups, latency tests and subnet sync through the Clash API and cannot start without it. Install a sing-box-extended package or a core built with with_clash_api";
     if (index(present, "with_gvisor") < 0) {
         let stranded = filter(GVISOR_TAGS, (tag) => index(present, tag) >= 0);
         if (length(stranded) > 0)
-            return "sing-box was built with " + join(", ", stranded) + " but without with_gvisor, the network stack Forkop runs these tunnels on. Install a sing-box-forkop package or a core built with with_gvisor";
+            return "sing-box was built with " + join(", ", stranded) + " but without with_gvisor, the network stack Forkop runs these tunnels on. Install a sing-box-extended package or a core built with with_gvisor";
     }
     return "";
 }

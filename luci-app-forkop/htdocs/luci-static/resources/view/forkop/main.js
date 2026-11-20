@@ -12308,7 +12308,7 @@ function coreItem(data) {
   const key = _("Core");
   const { installed, binary, version, variant, outdated, required: required2, problem } = data.core;
   if (!installed) {
-    return finding("error", key, _("sing-box-forkop is not installed"));
+    return finding("error", key, _("sing-box-extended is not installed"));
   }
   if (!binary) {
     return finding("error", key, problem);
@@ -12317,14 +12317,14 @@ function coreItem(data) {
     return finding(
       "error",
       key,
-      _("sing-box %s, not sing-box-forkop").format(binary)
+      _("sing-box %s, not sing-box-extended").format(binary)
     );
   }
   if (outdated) {
     return finding(
       "error",
       key,
-      _("sing-box-forkop %s is outdated: %s or newer is needed").format(
+      _("sing-box-extended %s is outdated: %s or newer is needed").format(
         version,
         required2
       )
@@ -12336,7 +12336,7 @@ function coreItem(data) {
   return finding(
     "success",
     key,
-    variant ? _("sing-box-forkop %s (%s)").format(version, variant) : _("sing-box-forkop %s").format(version)
+    variant ? _("sing-box-extended %s (%s)").format(version, variant) : _("sing-box-extended %s").format(version)
   );
 }
 function conflictItems(data) {

@@ -1,14 +1,13 @@
 #!/bin/sh
 # shellcheck shell=dash
 #
-# Installs, updates and removes Forkop and its core, sing-box-forkop, on OpenWrt 24.10 and newer.
+# Installs, updates and removes Forkop and its core, sing-box-extended, on OpenWrt 24.10 and newer.
 # Its options and exit codes are the interface Forkop's page runs it through, so they change only
 # in ways an older page understands.
 #
-# Options: --variant base|full|tiny, the core's build (the installed one, or base, by default),
-# with no value asked for at the terminal; --uninstall [--purge], with --purge the settings too;
-# --quiet, the package manager's output in the log alone, as the page has it; --lang ru|en, by
-# default LuCI's language, Russian while that is auto, since a console has no browser to follow.
+# Options: --uninstall [--purge], with --purge the settings too; --quiet, the package manager's
+# output in the log alone, as the page has it; --lang ru|en, by default LuCI's language, Russian
+# while that is auto, since a console has no browser to follow.
 # Exit codes: 0 done or nothing to do, 1 failed before anything changed, 2 bad options, 3 failed
 # after changes began, 4 installed but Forkop did not start.
 # Colors follow whether stdout is a terminal, questions whether /dev/tty opens: a page that runs it
@@ -20,39 +19,36 @@
 #
 # Every release carries release.json beside its packages, install.sh and SHA256SUMS:
 #   {"schema":1,"name":"forkop","version":"2.0.0","tag":"2.0.0","page":URL,
-#    "requires":{"sing-box-forkop":"1.14.4-r1"},"min_config_version":"1.0.2"}
-# The core's says "name":"sing-box-forkop" and requires the oldest Forkop it works with. An
-# "install_command" field says the release installs only with that command, not from the page.
+#    "requires":{"sing-box":"1.14.3-extended-2.7.3"},"min_config_version":"1.0.2"}
+# The core is shtorm-7/sing-box-extended, whose package provides sing-box. An "install_command"
+# field says the release installs only with that command, not from the page.
 
 set -u
 
 FORKOP_REPO=FryerTuck152/podkop-fork-fork
-CORE_REPO=ushan0v/sing-box-forkop
+CORE_REPO=shtorm-7/sing-box-extended
 # github.com answers a release link with a header line longer than uclient-fetch reads
 API_URL=https://api.github.com
 MIRROR=${FORKOP_DOWNLOAD_URL:-}
 LOG=/tmp/forkop-install.log
 LOCK_DIR=/var/lock/forkop-install.lock
-OUR_PACKAGES="forkop luci-app-forkop luci-i18n-forkop-ru sing-box-forkop"
+OUR_PACKAGES="forkop luci-app-forkop luci-i18n-forkop-ru sing-box-extended"
 # The other packages known to install /usr/bin/sing-box; any other package that owns it counts too.
-FOREIGN_CORES="sing-box sing-box-tiny sing-box-extended podkop-engine podkop-engine-full sing-box-lx sing-box-x rust-x steer-box-connector"
-# What sing-box-forkop provides: a package that needs it stays when a foreign core goes.
+FOREIGN_CORES="sing-box sing-box-tiny sing-box-forkop podkop-engine podkop-engine-full sing-box-lx sing-box-x rust-x steer-box-connector"
+# What sing-box-extended provides: a package that needs it stays when a foreign core goes.
 CORE_PROVIDES=sing-box
 # What a core outside the package managers leaves: Forkop 1.0.x's binary builds and the installer
 # of EikeiDev/OpenWRT-sing-box-extended, whose wrapper runs the core from /usr/libexec.
 FOREIGN_CORE_FILES="/usr/bin/sing-box /etc/init.d/sing-box /usr/libexec/sing-box-core /etc/sing-box-version.cache /usr/lib/libcronet.so"
 # Forkop 1.0.x's own state about its cores, and the backups its updater left when it failed.
 LEGACY_FILES="/etc/forkop/sing-box-variant /etc/forkop/sing-box-version /usr/bin/sing-box.forkop-backup.* /usr/lib/libcronet.so.forkop-backup.* /etc/init.d/sing-box.forkop.*"
-# What the builds of the core speak, by the variants of its build.sh: tiny, what base adds to it,
-# and what full adds to base (full_adds).
-TINY_HAS='VLESS, Trojan, Shadowsocks, Hysteria, Hysteria2, TUIC, SOCKS, HTTP'
-BASE_ADDS='WireGuard, AmneziaWG, WARP, OpenVPN, TrustTunnel, VMess, AnyTLS'
+# The core is a single build of sing-box-extended: there is no tiny, base or full to choose.
 # apk offline still opens every feed's index and warns for each one no apk update fetched since boot.
 APK_OFFLINE="--no-network --repositories-file /dev/null"
 # The defaults a package manager leaves beside a config it keeps.
 CONFFILE_COPIES="/etc/config/forkop-opkg /etc/config/forkop.apk-new /etc/config/sing-box-opkg /etc/config/sing-box.apk-new /etc/sing-box/config.json-opkg /etc/sing-box/config.json.apk-new"
 
-MODE=install VARIANT='' ASK_VARIANT=0 PURGE=0 QUIET=0 LANG_OPT='' BAD_ARG=''
+MODE=install PURGE=0 QUIET=0 LANG_OPT='' BAD_ARG=''
 RU=0 INTERACTIVE=0 ASKED=0 PROMPTING=0 ANSWER='' C_STEP='' C_OK='' C_WARN='' C_ERR='' C_BOLD='' C_OFF=''
 WORK='' LOCKED=0
 PM='' PM_DB='' EXT='' ARCH='' RELEASE='' FLASH_MOUNT=/ FLASH_FS=''
@@ -150,16 +146,13 @@ on_signal() { # before any change: apply and uninstall ignore these signals whil
 usage_error() {
 	local message
 	case "$BAD_ARG" in
-	variant) message=$(t 'The option --variant takes base, full or tiny' 'Параметр --variant принимает base, full или tiny') ;;
 	lang) message=$(t 'The option --lang takes ru or en' 'Параметр --lang принимает ru или en') ;;
 	purge) message=$(t 'The option --purge goes with --uninstall' 'Параметр --purge работает только с --uninstall') ;;
-	uninstall) message=$(t 'The option --uninstall takes no --variant' 'Параметр --uninstall не сочетается с --variant') ;;
-	variant_tty) message=$(t 'The option --variant with no value asks for the build and needs a terminal' 'Параметр --variant без значения спрашивает сборку и работает только в терминале') ;;
 	value:*) message=$(t '%s needs a value' 'Параметру %s нужно значение' "${BAD_ARG#value:}") ;;
 	*) message=$(t 'Unknown option: %s' 'Неизвестный параметр: %s' "${BAD_ARG#unknown:}") ;;
 	esac
 	say '[x]' "$C_ERR" "$message" >&2
-	detail "$(t 'Options: --variant [base|full|tiny], --uninstall [--purge], --quiet, --lang ru|en' 'Параметры: --variant [base|full|tiny], --uninstall [--purge], --quiet, --lang ru|en')" >&2
+	detail "$(t 'Options: --uninstall [--purge], --quiet, --lang ru|en' 'Параметры: --uninstall [--purge], --quiet, --lang ru|en')" >&2
 	exit 2
 }
 
@@ -191,51 +184,6 @@ question_block() { # the questions on what to install go together, a blank line 
 
 may_ask() { # a person at a terminal
 	[ "$INTERACTIVE" = 1 ]
-}
-
-full_adds() { # what full adds to base, as the core's build.sh builds it for this processor
-	printf 'Tailscale, OpenConnect, '
-	# NaiveProxy links cronet, which cronet-go builds for these processors only
-	case "$ARCH" in
-	x86_64 | i386_pentium4 | aarch64_* | arm_cortex-a*_* | mipsel_24kc | mipsel_24kc_24kf | mipsel_74kc | riscv64_* | loongarch64_*)
-		printf 'NaiveProxy, '
-		;;
-	esac
-	printf 'Mieru, Snell, SSH, ShadowTLS, Tor'
-}
-
-menu_card() { # menu_card NUMBER NAME TAG [TAG_COLOR] [DETAILS]: an option of the build menu, its details under it, a blank line after
-	printf '%s%s)%s %s%s%s — %s%s%s\n' "$C_STEP" "$1" "$C_OFF" "$C_BOLD" "$2" "$C_OFF" "${4:-}" "$3" "$C_OFF"
-	[ -z "${5:-}" ] || printf '   %s\n' "$5"
-	printf '\n'
-}
-
-choose_variant() { # choose_variant [KEEP]: CORE_VARIANT from a menu at the terminal; KEEP offers to keep the custom core
-	local default=2
-	case "$CORE_VARIANT" in tiny) default=1 ;; full) default=3 ;; esac
-	[ -z "${1:-}" ] || default=0
-	question_block
-	{
-		if [ -z "$CORE_OLD" ]; then
-			printf '%s\n\n' "$(t 'Forkop runs on its own core, sing-box-forkop' 'Forkop работает на собственном ядре sing-box-forkop')"
-		elif [ "$CORE_VARIANT" != custom ]; then
-			printf '%s\n\n' "$(t 'Installed: sing-box-forkop %s (%s)' 'Установлен sing-box-forkop %s (%s)' "$CORE_OLD" "$CORE_VARIANT")"
-		fi
-		[ -z "${1:-}" ] || menu_card 0 custom "$(t 'keep the custom build %s' 'оставить кастомную сборку %s' "$1")"
-		menu_card 1 tiny "$(t minimal минимальная)" '' "$TINY_HAS"
-		menu_card 2 base "$(t recommended рекомендуемая)" "$C_OK" "+ $BASE_ADDS"
-		menu_card 3 full "$(t maximal максимальная)" '' "+ $(full_adds)"
-	} >/dev/tty
-	while :; do
-		prompt "$(t 'Which build of sing-box-forkop to install?' 'Какую сборку sing-box-forkop установить?')" "$default"
-		case "${ANSWER:-$default}" in
-		0 | custom) [ "$default" = 0 ] && break ;;
-		1 | tiny) CORE_VARIANT=tiny && break ;;
-		2 | base) CORE_VARIANT=base && break ;;
-		3 | full) CORE_VARIANT=full && break ;;
-		esac
-	done
-	log "build chosen: $CORE_VARIANT"
 }
 
 ask_translation() { # a first install asks whether Forkop's page gets its Russian translation
@@ -411,8 +359,8 @@ pkg_depends() { # the dependencies of installed package $1
 	awk -F '\t' -v p="$1" '$1 == p { print $3; exit }' "$WORK/db"
 }
 
-core_requirement() { # the sing-box-forkop version a Depends field asks for: opkg "(>= V)", apk ">=V"
-	printf '%s\n' "$1" | sed -n 's/.*sing-box-forkop *(* *>= *\([^), ]*\).*/\1/p'
+core_requirement() { # the core version a Depends field asks for: opkg "(>= V)", apk ">=V"
+	printf '%s\n' "$1" | sed -n 's/.*[^-]sing-box *(* *>= *\([^), ]*\).*/\1/p'
 }
 
 provided() { # an installed package is or provides $1
@@ -695,7 +643,7 @@ package_arch() { # what packages are built for: apk --print-arch names its own b
 	fi
 }
 
-unbuilt_reason() { # why no sing-box-forkop exists for architecture $1
+unbuilt_reason() { # why no sing-box-extended exists for architecture $1
 	case "$1" in
 	arm_fa526) t 'ARMv4 is too old' 'ARMv4 слишком старый' ;;
 	armeb_xscale) t 'big-endian ARM is not supported' 'ARM с обратным порядком байт не поддерживается' ;;
@@ -787,8 +735,9 @@ read_state() {
 	[ -n "$FORKOP_OLD" ] && [ "$FORK_URL" != "https://github.com/$FORKOP_REPO" ] || FORK_URL=''
 	APP_OLD=$(pkg_version luci-app-forkop)
 	I18N_OLD=$(pkg_version luci-i18n-forkop-ru)
-	CORE_OLD=$(pkg_version sing-box-forkop)
-	[ -z "$CORE_OLD" ] || CORE_OLD_VARIANT=$(cat /usr/share/sing-box-forkop/variant 2>/dev/null)
+	# opkg writes the core's version with ~ between its parts: compare it with the tag's -
+	CORE_OLD=$(pkg_version sing-box-extended | tr '~' '-')
+	[ -z "$CORE_OLD" ] || CORE_OLD_VARIANT=extended
 	[ ! -f /etc/config/forkop ] || CONFIG_VERSION=$(uci -q get forkop.settings.config_version)
 	forkop_status
 
@@ -801,7 +750,7 @@ read_state() {
 	done
 	for file in $FOREIGN_CORE_FILES; do
 		[ -e "$file" ] || continue
-		# sing-box-forkop installs these itself, and an opkg run that ran out of space cuts its file list
+		# the core's package installs these itself, and an opkg run that ran out of space cuts its file list
 		[ -z "$CORE_OLD" ] || case "$file" in /usr/bin/sing-box | /etc/init.d/sing-box) continue ;; esac
 		owner=$(file_owner "$file")
 		[ -n "$owner" ] || FOREIGN_FILES="$FOREIGN_FILES $file"
@@ -813,7 +762,7 @@ read_state() {
 	if [ -n "$owner" ] && ! contains "$owner" "$OUR_PACKAGES $FOREIGN_PKGS"; then
 		FOREIGN_PKGS="$FOREIGN_PKGS $owner"
 	fi
-	log "installed: forkop ${FORKOP_OLD:-none}${FORK_URL:+ from $FORK_URL}, sing-box-forkop ${CORE_OLD:-none} ${CORE_OLD_VARIANT}," \
+	log "installed: forkop ${FORKOP_OLD:-none}${FORK_URL:+ from $FORK_URL}, sing-box-extended ${CORE_OLD:-none} ${CORE_OLD_VARIANT}," \
 		"other cores:${FOREIGN_PKGS:- none}, files of no package:${FOREIGN_FILES:- none}, config ${CONFIG_VERSION:-none}"
 }
 
@@ -826,11 +775,8 @@ read_manifest() { # read_manifest FILE NAME: prints version, tag and requirement
 	[ "$name" = "$2" ] && [ "$schema" = 1 ] || return 1
 	jsonfilter -i "$1" -e '@.version' 2>/dev/null || return 1
 	jsonfilter -i "$1" -e '@.tag' 2>/dev/null || echo
-	if [ "$2" = forkop ]; then
-		jsonfilter -i "$1" -e '@.requires["sing-box-forkop"]' 2>/dev/null || echo
-	else
-		jsonfilter -i "$1" -e '@.requires.forkop' 2>/dev/null || echo
-	fi
+	[ "$2" = forkop ] || return 1
+	jsonfilter -i "$1" -e '@.requires["sing-box"]' 2>/dev/null || echo
 }
 
 fetch_or_fail() { # fetch_or_fail URL FILE NAME RELEASE: a file of a release, or the reason it is not there
@@ -846,7 +792,20 @@ fetch_or_fail() { # fetch_or_fail URL FILE NAME RELEASE: a file of a release, or
 
 fetch_release() { # fetch_release forkop|core: the latest release's manifest, and from the API its files
 	local repo=$FORKOP_REPO name=Forkop package=forkop manifest="$WORK/$1.json" url status=0
-	[ "$1" = forkop ] || repo=$CORE_REPO name=sing-box-forkop package=sing-box-forkop
+	if [ "$1" = core ]; then
+		# sing-box-extended has no release.json: its tag is the version and its assets are the package
+		download "$API_URL/repos/$CORE_REPO/releases/latest" "$WORK/core.release" || {
+			status=$?
+			[ "$status" != 3 ] || rate_limited
+			fail 1 network "$(t 'Cannot download the information on the sing-box-extended release' 'Не удалось скачать сведения о релизе sing-box-extended')" "$(network_hint)"
+		}
+		C_TAG=$(jsonfilter -i "$WORK/core.release" -e '@.tag_name' 2>/dev/null)
+		[ -n "$C_TAG" ] ||
+			fail 1 release "$(t 'The latest sing-box-extended release has no tag' 'В последнем релизе sing-box-extended нет тега')"
+		C_VERSION=${C_TAG#v}
+		C_FORKOP_MIN=''
+		return 0
+	fi
 	if [ -z "$MIRROR" ]; then
 		download "$API_URL/repos/$repo/releases/latest" "$WORK/$1.release"
 		status=$?
@@ -868,21 +827,12 @@ fetch_release() { # fetch_release forkop|core: the latest release's manifest, an
 	read_manifest "$manifest" "$package" >"$WORK/$1.fields" ||
 		fail 1 release "$(t 'Cannot read the information on the %s release' 'Не удалось прочитать сведения о релизе %s' "$name")" \
 			"$(t 'Download the latest install.sh' 'Скачайте свежий install.sh')"
-	if [ "$1" = forkop ]; then
-		{
-			read -r F_VERSION
-			read -r F_TAG
-			read -r F_CORE_MIN
-		} <"$WORK/forkop.fields"
-		F_TAG=${F_TAG:-$F_VERSION}
-	else
-		{
-			read -r C_VERSION
-			read -r C_TAG
-			read -r C_FORKOP_MIN
-		} <"$WORK/core.fields"
-		C_TAG=${C_TAG:-v$C_VERSION}
-	fi
+	{
+		read -r F_VERSION
+		read -r F_TAG
+		read -r F_CORE_MIN
+	} <"$WORK/forkop.fields"
+	F_TAG=${F_TAG:-$F_VERSION}
 }
 
 resolve_release() {
@@ -923,46 +873,19 @@ decide_forkop() { # the Forkop packages to install, NEED_*, and the Forkop that 
 	[ "$I18N" = 0 ] || { [ "$NEED_APP" = 0 ] && [ "$I18N_OLD" = "$F_VERSION" ]; } || NEED_I18N=1
 }
 
-decide_core() { # the build, the core release and whether the core is installed
-	local order text
-	if [ -n "$VARIANT" ]; then
-		CORE_VARIANT=$VARIANT
-	elif [ -n "$CORE_OLD" ]; then
-		case "$CORE_OLD_VARIANT" in base | full | tiny) CORE_VARIANT=$CORE_OLD_VARIANT ;; *) CORE_VARIANT=custom ;; esac
-		[ "$ASK_VARIANT" = 0 ] || [ "$CORE_VARIANT" = custom ] || choose_variant
-	else
-		CORE_VARIANT=base
-		! may_ask || choose_variant
-	fi
-	if [ "$CORE_VARIANT" = custom ]; then
-		if [ -n "$F_CORE_MIN" ] && older "$CORE_OLD" "$F_CORE_MIN"; then
-			text=$(t 'The custom build of sing-box-forkop %s is too old: forkop %s needs %s or newer' 'Кастомная сборка sing-box-forkop %s слишком старая: forkop %s требует %s или новее' "$CORE_OLD" "$RESULT_FORKOP" "$F_CORE_MIN")
-			may_ask || fail 1 incompatible "$text" "$(t 'Install an official build: --variant base, full or tiny' 'Поставьте официальную сборку: --variant base, full или tiny')"
-			warn custom_outdated "$text"
-			choose_variant
-		elif older "$CORE_OLD" "$C_VERSION"; then
-			warn custom_outdated "$(t 'The custom build of sing-box-forkop %s is outdated: %s is available' 'Кастомная сборка sing-box-forkop %s устарела: доступна %s' "$CORE_OLD" "$C_VERSION")"
-			! may_ask || choose_variant "$CORE_OLD"
-		elif [ "$ASK_VARIANT" = 1 ]; then
-			choose_variant "$CORE_OLD"
-		fi
-	fi
-	if [ "$CORE_VARIANT" = custom ]; then
-		RESULT_CORE=$CORE_OLD RESULT_VARIANT=custom
-		return 0
-	fi
-	RESULT_CORE=$C_VERSION RESULT_VARIANT=$CORE_VARIANT
+decide_core() { # the core release and whether the core is installed
+	RESULT_CORE=$C_VERSION RESULT_VARIANT=extended
 	if [ -z "$CORE_OLD" ]; then
 		CORE_ACTION=install
 	else
-		order=$(vercmp "$CORE_OLD" "$C_VERSION")
-		if [ "$order" = 1 ]; then
-			info "$(t 'sing-box-forkop %s is newer than the latest release %s and stays' 'sing-box-forkop %s новее последнего релиза %s и остаётся' "$CORE_OLD" "$C_VERSION")"
-			RESULT_CORE=$CORE_OLD RESULT_VARIANT=$CORE_OLD_VARIANT
-		elif [ "$order" != 0 ] || [ "$CORE_VARIANT" != "$CORE_OLD_VARIANT" ]; then
-			CORE_ACTION=install
-			[ "$order" != 0 ] || CORE_REINSTALL=1
-		fi
+		case "$(vercmp "$CORE_OLD" "$C_VERSION")" in
+		1)
+			info "$(t 'sing-box-extended %s is newer than the latest release %s and stays' 'sing-box-extended %s новее последнего релиза %s и остаётся' "$CORE_OLD" "$C_VERSION")"
+			RESULT_CORE=$CORE_OLD
+			;;
+		0) ;;
+		*) CORE_ACTION=install ;;
+		esac
 	fi
 	check_compatible
 }
@@ -970,32 +893,43 @@ decide_core() { # the build, the core release and whether the core is installed
 check_compatible() { # the Forkop and the core that will run work together
 	# what a core needs of Forkop only its release says
 	if [ "$RESULT_CORE" = "$C_VERSION" ] && [ -n "$C_FORKOP_MIN" ] && older "$RESULT_FORKOP" "$C_FORKOP_MIN"; then
-		fail 1 incompatible "$(t 'sing-box-forkop %s needs forkop %s or newer, and forkop %s would run' 'sing-box-forkop %s требует forkop %s или новее, а будет forkop %s' "$C_VERSION" "$C_FORKOP_MIN" "$RESULT_FORKOP")"
+		fail 1 incompatible "$(t 'sing-box-extended %s needs forkop %s or newer, and forkop %s would run' 'sing-box-extended %s требует forkop %s или новее, а будет forkop %s' "$C_VERSION" "$C_FORKOP_MIN" "$RESULT_FORKOP")"
 	fi
 	if [ -n "$F_CORE_MIN" ] && older "$RESULT_CORE" "$F_CORE_MIN"; then
-		fail 1 incompatible "$(t 'forkop %s needs sing-box-forkop %s or newer, and the latest is %s' 'forkop %s требует sing-box-forkop %s или новее, а последний релиз — %s' "$RESULT_FORKOP" "$F_CORE_MIN" "$C_VERSION")" \
+		fail 1 incompatible "$(t 'forkop %s needs sing-box-extended %s or newer, and the latest is %s' 'forkop %s требует sing-box-extended %s или новее, а последний релиз — %s' "$RESULT_FORKOP" "$F_CORE_MIN" "$C_VERSION")" \
 			"$(t 'That release is not out yet: run the installer later' 'Этот релиз ещё не вышел, запустите установщик позже')"
 	fi
 }
 
 stop_if_current() { # nothing to install: the installed versions, and the run ends
 	[ "$NEED_FORKOP$NEED_APP$NEED_I18N" = 000 ] && [ "$CORE_ACTION" = none ] || return 0
-	info "$(t 'Up to date: forkop %s, sing-box-forkop %s (%s)' 'Обновлений нет: forkop %s, sing-box-forkop %s (%s)' "$RESULT_FORKOP" "$RESULT_CORE" "$RESULT_VARIANT")"
+	info "$(t 'Up to date: forkop %s, sing-box-extended %s' 'Обновлений нет: forkop %s, sing-box-extended %s' "$RESULT_FORKOP" "$RESULT_CORE")"
 	finish 0
 }
 
 # --- getting the packages -------------------------------------------------------------------
 
-core_file() { # core_file VARIANT
-	printf 'sing-box-forkop_%s_%s_%s.%s' "$C_VERSION" "$1" "$ARCH" "$EXT"
+core_file() { # core_file: the release's package for this architecture
+	printf 'sing-box-extended_%s_openwrt_%s.%s' "$C_VERSION" "$ARCH" "$EXT"
 }
 
-get_package() { # get_package forkop|core FILE: GOT is FILE of that release, checked against its SHA256SUMS
-	local sums="$WORK/$1.sums" file="$WORK/$2" url name="Forkop $F_VERSION"
-	[ "$1" = forkop ] || name="sing-box-forkop $C_VERSION"
+get_package() { # get_package forkop|core FILE: GOT is FILE of that release, checked against its sum
+	local sums="$WORK/$1.sums" file="$WORK/$2" url expected name="Forkop $F_VERSION"
+	if [ "$1" = core ]; then
+		name="sing-box-extended $C_VERSION"
+		url=$(asset_url core "$2")
+		[ -n "$url" ] || fail 1 release "$(t 'Release sing-box-extended %s has no build for %s' 'В релизе sing-box-extended %s нет сборки для %s' "$C_VERSION" "$ARCH")"
+		expected=$(jsonfilter -i "$WORK/core.release" -e "@.assets[@.name=\"$2\"].digest" 2>/dev/null | sed 's/^sha256://')
+		fetch_or_fail "$url" "$file" "$2" "$name"
+		if [ -n "$expected" ] && [ "$(sha256sum "$file" | cut -d ' ' -f 1)" != "$expected" ]; then
+			fail 1 checksum "$(t '%s is damaged: its SHA256 sum does not match' 'Файл %s повреждён: сумма SHA256 не совпадает' "$2")"
+		fi
+		info "$(t 'Downloaded %s' 'Загружен %s' "$2")"
+		GOT=$file
+		return 0
+	fi
 	[ -s "$sums" ] || fetch_or_fail "$(asset_url "$1" SHA256SUMS)" "$sums" SHA256SUMS "$name"
 	if [ -z "$(checksum_of "$2" "$sums")" ]; then
-		[ "$1" = forkop ] || fail 1 release "$(t 'Release sing-box-forkop %s has no %s build for %s' 'В релизе sing-box-forkop %s нет сборки %s для %s' "$C_VERSION" "$CORE_VARIANT" "$ARCH")"
 		fail 1 release "$(t 'Release %s has no %s' 'В релизе %s нет %s' "$name" "$2")"
 	fi
 	url=$(asset_url "$1" "$2")
@@ -1013,9 +947,8 @@ need_ram_kb() { # what the run puts in RAM while Forkop still runs: the download
 	# package of its build, and the largest of the checks run beside them
 	local kb=6144
 	[ "$NEED_FORKOP$NEED_APP$NEED_I18N" = 000 ] || kb=$((kb + 1024))
-	if [ "$CORE_ACTION" = install ]; then
-		case "$CORE_VARIANT" in full) kb=$((kb + 24576)) ;; tiny) kb=$((kb + 11264)) ;; *) kb=$((kb + 13312)) ;; esac
-	fi
+	# the core's package is about 40 MB: downloaded into /tmp and then unpacked
+	[ "$CORE_ACTION" != install ] || kb=$((kb + 45056))
 	echo "$kb"
 }
 
@@ -1052,7 +985,7 @@ download_packages() {
 		FILE_I18N=$GOT
 	fi
 	if [ "$CORE_ACTION" = install ]; then
-		get_package core "$(core_file "$CORE_VARIANT")"
+		get_package core "$(core_file)"
 		FILE_CORE=$GOT
 	fi
 }
@@ -1134,7 +1067,7 @@ plan_removals() {
 	for file in $FILE_CORE $FILE_FORKOP $FILE_APP $FILE_I18N; do
 		control=$(control_of "$file")
 		for name in $(dep_names "$(field "$control" Depends)"); do
-			contains "$name" "$OUR_PACKAGES $DEPS_MISSING" || provided "$name" || DEPS_MISSING="$DEPS_MISSING $name"
+			contains "$name" "$OUR_PACKAGES $CORE_PROVIDES $DEPS_MISSING" || provided "$name" || DEPS_MISSING="$DEPS_MISSING $name"
 		done
 	done
 	DEPS_MISSING=${DEPS_MISSING# }
@@ -1233,14 +1166,14 @@ update_lists() { # feed indexes, when a dependency has to come from them
 apk_constraints() { # what the world gets for apk to drop the packages that go
 	local name
 	for name in $REMOVE_PKGS $FOREIGN_WORLD; do
-		# sing-box-forkop provides sing-box, so a conflict with that name would be one with itself;
-		# left unversioned, the name goes to it instead of the package of that name
-		if [ "$name" = sing-box ]; then echo sing-box; else echo "!$name"; fi
+		# the new core is named sing-box-extended and provides sing-box, so the package of that
+		# name goes rather than the provider that replaces it in the same transaction
+		echo "!$name"
 	done
 }
 
 packages_in_transaction() {
-	[ -z "$FILE_CORE" ] || [ "$CORE_REINSTALL" = 1 ] || echo sing-box-forkop
+	[ -z "$FILE_CORE" ] || [ "$CORE_REINSTALL" = 1 ] || echo sing-box-extended
 	[ -z "$FILE_FORKOP" ] || echo forkop
 	[ -z "$FILE_APP" ] || echo luci-app-forkop
 	[ -z "$FILE_I18N" ] || echo luci-i18n-forkop-ru
@@ -1308,7 +1241,7 @@ install_dependencies() {
 	step dependencies "$(t 'Installing dependencies: %s' 'Установка зависимостей: %s' "$(commas "$DEPS_MISSING")")"
 	# shellcheck disable=SC2086
 	run detached "$PM" "$([ "$PM" = apk ] && echo add || echo install)" $DEPS_MISSING ||
-		fail 3 dependencies "$(t 'Cannot install the dependencies; forkop and sing-box-forkop were not touched' 'Не удалось установить зависимости, forkop и sing-box-forkop не тронуты')" "$(network_hint)"
+		fail 3 dependencies "$(t 'Cannot install the dependencies; forkop and sing-box-extended were not touched' 'Не удалось установить зависимости, forkop и sing-box-extended не тронуты')" "$(network_hint)"
 	# shellcheck disable=SC2086
 	pulled_in $DEPS_MISSING
 	refresh_db
@@ -1473,7 +1406,7 @@ transaction() {
 		cp /usr/lib/opkg/status "$WORK/opkg-status" 2>/dev/null
 		if [ -n "$REMOVE_PKGS" ]; then
 			order=$(removal_order "$REMOVE_PKGS")
-			# what still needs a foreign core's sing-box gets it from sing-box-forkop within this run
+			# what still needs a foreign core's sing-box gets it from sing-box-extended within this run
 			# shellcheck disable=SC2086
 			perform "$out.remove" detached opkg --force-depends remove $order || status=$?
 		fi
@@ -1509,8 +1442,7 @@ repair_opkg_db() { # opkg leaves its status file cut short when the flash runs o
 
 check_installed() { # what the transaction left, against what it was to install
 	local problems='' name reason db_hint=''
-	[ -z "$FILE_CORE" ] || [ "$(pkg_version sing-box-forkop)" = "$(field "$(control_of "$FILE_CORE")" Version)" ] || problems="$problems sing-box-forkop"
-	[ -z "$FILE_CORE" ] || [ "$(cat /usr/share/sing-box-forkop/variant 2>/dev/null)" = "$CORE_VARIANT" ] || contains sing-box-forkop "$problems" || problems="$problems sing-box-forkop"
+	[ -z "$FILE_CORE" ] || [ "$(pkg_version sing-box-extended | tr '~' '-')" = "$(field "$(control_of "$FILE_CORE")" Version | tr '~' '-')" ] || problems="$problems sing-box-extended"
 	[ -z "$FILE_FORKOP" ] || [ "$(pkg_version forkop)" = "$F_VERSION" ] || problems="$problems forkop"
 	[ -z "$FORK_URL" ] || [ "$(pkg_url forkop)" != "$FORK_URL" ] || contains forkop "$problems" || problems="$problems forkop"
 	[ -z "$FILE_APP" ] || [ "$(pkg_version luci-app-forkop)" = "$F_VERSION" ] || problems="$problems luci-app-forkop"
@@ -1635,9 +1567,9 @@ summary() {
 		result=$(t 'Forkop is updated to %s' 'Forkop обновлён до %s' "$RESULT_FORKOP")
 	elif [ "$CORE_ACTION" = install ]; then
 		if [ -n "$CORE_OLD" ] && [ "$CORE_REINSTALL" = 0 ]; then
-			result=$(t 'sing-box-forkop is updated to %s (%s)' 'sing-box-forkop обновлён до %s (%s)' "$RESULT_CORE" "$RESULT_VARIANT")
+			result=$(t 'sing-box-extended is updated to %s' 'sing-box-extended обновлён до %s' "$RESULT_CORE")
 		else
-			result=$(t 'sing-box-forkop %s (%s) is installed' 'sing-box-forkop %s (%s) установлен' "$RESULT_CORE" "$RESULT_VARIANT")
+			result=$(t 'sing-box-extended %s is installed' 'sing-box-extended %s установлен' "$RESULT_CORE")
 		fi
 		runs=$(t ', Forkop is running' ', Forkop запущен')
 	else
@@ -1659,10 +1591,10 @@ uninstall() {
 	local packages='' name file out="$WORK/remove" before='' users
 	refresh_db
 	# podkop and the like stay beside Forkop on its core, which provides sing-box: the core goes with them
-	users=$(needed_by sing-box-forkop "$CORE_PROVIDES")
-	for name in luci-i18n-forkop-ru luci-app-forkop forkop sing-box-forkop; do
+	users=$(needed_by "$CORE_PROVIDES")
+	for name in luci-i18n-forkop-ru luci-app-forkop forkop sing-box-extended; do
 		[ -n "$(pkg_version "$name")" ] || continue
-		[ "$name" != sing-box-forkop ] || [ -z "$users" ] || continue
+		[ "$name" != sing-box-extended ] || [ -z "$users" ] || continue
 		packages="$packages $name"
 		before="$before$name $(pkg_version "$name")
 "
@@ -1689,7 +1621,7 @@ uninstall() {
 		perform "$out" detached opkg remove $packages && drop_dependencies
 	fi
 	# opkg leaves the directories it emptied
-	find /usr/lib/forkop /usr/share/forkop /usr/share/sing-box-forkop /www/luci-static/resources/view/forkop -type d 2>/dev/null |
+	find /usr/lib/forkop /usr/share/forkop /usr/share/sing-box-extended /www/luci-static/resources/view/forkop -type d 2>/dev/null |
 		sort -r | while read -r dir; do rmdir "$dir" 2>/dev/null; done
 	refresh_db
 	before=$(printf '%s' "$before" | sort)
@@ -1699,8 +1631,8 @@ uninstall() {
 		[ -z "$(pkg_version "$name")" ] ||
 			fail 3 transaction "$(t '%s was not removed: %s' 'Пакет %s не удалён: %s' "$name" "$(pm_errors "$out")")"
 	done
-	[ -z "$users" ] || [ -z "$(pkg_version sing-box-forkop)" ] ||
-		warn core_kept "$(t 'sing-box-forkop stays for %s' 'sing-box-forkop остаётся для %s' "$(commas "$users")")"
+	[ -z "$users" ] || [ -z "$(pkg_version sing-box-extended)" ] ||
+		warn core_kept "$(t 'sing-box-extended stays for %s' 'sing-box-extended остаётся для %s' "$(commas "$users")")"
 	if [ "$PURGE" = 1 ]; then
 		for file in /etc/config/forkop /etc/config/forkop.* /etc/config/forkop-opkg /etc/forkop; do
 			[ ! -e "$file" ] || rm -rf "$file"
@@ -1718,18 +1650,15 @@ uninstall() {
 parse_args() { # BAD_ARG names the first mistake, reported once the language is known
 	while [ "$#" -gt 0 ]; do
 		case "$1" in
-		--variant)
-			case "${2:-}" in '' | --*) ASK_VARIANT=1 ;; *) VARIANT=$2 && shift ;; esac
+		--variant) # a page of an older Forkop asks for a build: the core has one now
+			case "${2:-}" in '' | --*) ;; *) shift ;; esac
 			;;
 		--lang)
 			[ "$#" -ge 2 ] || { BAD_ARG="value:$1"; return; }
 			LANG_OPT=$2
 			shift
 			;;
-		--variant=*)
-			VARIANT=${1#*=}
-			[ -n "$VARIANT" ] || ASK_VARIANT=1
-			;;
+		--variant=*) ;;
 		--lang=*) LANG_OPT=${1#*=} ;;
 		--uninstall) MODE=uninstall ;;
 		--purge) PURGE=1 ;;
@@ -1739,16 +1668,13 @@ parse_args() { # BAD_ARG names the first mistake, reported once the language is 
 		shift
 	done
 	case "$LANG_OPT" in '' | ru | en) ;; *) LANG_OPT='' BAD_ARG=lang && return ;; esac
-	case "$VARIANT" in '' | base | full | tiny) ;; *) BAD_ARG=variant && return ;; esac
 	[ "$PURGE" = 0 ] || [ "$MODE" = uninstall ] || { BAD_ARG=purge && return; }
-	[ "$MODE" = install ] || { [ -z "$VARIANT" ] && [ "$ASK_VARIANT" = 0 ]; } || BAD_ARG=uninstall
 }
 
 main() {
 	parse_args "$@"
 	pick_language
 	setup_output
-	[ "$ASK_VARIANT" = 0 ] || [ -n "$BAD_ARG" ] || may_ask || BAD_ARG=variant_tty
 	[ -z "$BAD_ARG" ] || usage_error
 	( : >"$LOG" ) 2>/dev/null || LOG=/dev/null
 	log "install.sh $* ($(date))"

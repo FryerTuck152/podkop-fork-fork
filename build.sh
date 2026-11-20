@@ -43,8 +43,8 @@ APK_SDK_URL="${APK_SDK_URL:-https://downloads.openwrt.org/releases/25.12.3/targe
 BACKEND_DESCRIPTION="Rule-based traffic routing for OpenWrt"
 APP_DESCRIPTION="Web interface for Forkop"
 I18N_DESCRIPTION="Translation for luci-app-forkop - Русский (Russian)"
-MAINTAINER="ushan0v <ushan0v@users.noreply.github.com>"
-PROJECT_URL="https://github.com/ushan0v/forkop"
+MAINTAINER="FryerTuck152 <251702400+FryerTuck152@users.noreply.github.com>"
+PROJECT_URL="https://github.com/FryerTuck152/podkop-fork-fork"
 uc_constant() {
   sed -n "s/^[[:space:]]*\(const[[:space:]]\{1,\}\)\{0,1\}$2[[:space:]]*[:=][[:space:]]*\"\([^\"]*\)\".*/\2/p" "$ROOT_DIR/forkop/files/usr/lib/$1"
 }
@@ -55,11 +55,12 @@ if [[ ! "$SB_REQUIRED_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+-r[0-9]+$ ]] ||
   echo "Cannot read SB_REQUIRED_VERSION or MIN_CONFIG_VERSION from the sources" >&2
   exit 1
 fi
-# Forkop runs only on its own core. A 1.0.x updater installs luci-app-forkop and forkop by
-# file and never the core: this dependency makes that fail before anything changes.
+# Forkop runs on sing-box-extended, which provides sing-box. A 1.0.x updater installs
+# luci-app-forkop and forkop by file and never the core: this dependency makes that fail before
+# anything changes.
 # APK says ip: apk refuses ip-tiny beside ip-full, yet takes it for ip; opkg takes ip-full for ip
-BACKEND_DEPENDS_IPK="libc, ca-bundle, ucode, ucode-mod-fs, ucode-mod-resolv, ucode-mod-socket, ucode-mod-ubus, ucode-mod-uloop, ucode-mod-uci, uclient-fetch, kmod-nft-tproxy, nftables, kmod-nft-nat, ip-tiny, sing-box-forkop (>= ${SB_REQUIRED_VERSION})"
-BACKEND_DEPENDS_APK="ca-bundle ip kmod-nft-nat kmod-nft-tproxy libc nftables uclient-fetch ucode ucode-mod-fs ucode-mod-resolv ucode-mod-socket ucode-mod-ubus ucode-mod-uci ucode-mod-uloop sing-box-forkop>=${SB_REQUIRED_VERSION}"
+BACKEND_DEPENDS_IPK="libc, ca-bundle, ucode, ucode-mod-fs, ucode-mod-resolv, ucode-mod-socket, ucode-mod-ubus, ucode-mod-uloop, ucode-mod-uci, uclient-fetch, kmod-nft-tproxy, nftables, kmod-nft-nat, ip-tiny, sing-box"
+BACKEND_DEPENDS_APK="ca-bundle ip kmod-nft-nat kmod-nft-tproxy libc nftables uclient-fetch ucode ucode-mod-fs ucode-mod-resolv ucode-mod-socket ucode-mod-ubus ucode-mod-uci ucode-mod-uloop sing-box"
 # The app calls the backend's ubus object, so it needs a backend at least as new;
 # the feed Makefile's DEPENDS cannot express a version.
 APP_DEPENDS_IPK="libc, luci-base, forkop (>= ${RELEASE_VERSION})"
@@ -624,7 +625,7 @@ verify_ipk_metadata() {
   grep -q "^Version: ${expected_version}$" "$tmp_dir/control"
   case "$expected_package" in
     forkop)
-      grep -q "^Depends: .*sing-box-forkop (>= ${SB_REQUIRED_VERSION})" "$tmp_dir/control"
+      grep -q "^Depends: .*sing-box" "$tmp_dir/control"
       ;;
     luci-app-forkop) grep -q "^Depends: .*forkop (>= ${expected_version})" "$tmp_dir/control" ;;
     luci-i18n-forkop-ru) grep -q "^Depends: .*luci-app-forkop (>= ${expected_version})" "$tmp_dir/control" ;;
@@ -645,7 +646,7 @@ verify_apk_metadata() {
   grep -q "^  version: ${expected_version}$" "$dump_file"
   case "$expected_package" in
     forkop)
-      grep -q "^[[:space:]]*- sing-box-forkop>=${SB_REQUIRED_VERSION}$" "$dump_file"
+      grep -q "^[[:space:]]*- sing-box$" "$dump_file"
       ;;
     luci-app-forkop) grep -q "^[[:space:]]*- forkop>=${expected_version}$" "$dump_file" ;;
     luci-i18n-forkop-ru) grep -q "^[[:space:]]*- luci-app-forkop>=${expected_version}$" "$dump_file" ;;
@@ -676,7 +677,7 @@ write_release_files() {
   "version": "${RELEASE_VERSION}",
   "tag": "${RELEASE_VERSION}",
   "page": "${PROJECT_URL}/releases/tag/${RELEASE_VERSION}",
-  "requires": { "sing-box-forkop": "${SB_REQUIRED_VERSION}" },
+  "requires": { "sing-box": "${SB_REQUIRED_VERSION}" },
   "min_config_version": "${MIN_CONFIG_VERSION}"${install_command}
 }
 EOF

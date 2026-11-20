@@ -1769,22 +1769,22 @@ function check_requirements() {
             "Boot without ipv6.disable=1 and turn IPv6 off with sysctl net.ipv6.conf.all.disable_ipv6=1 instead");
 
     if (!command_exists("sing-box"))
-        die("Binary 'sing-box' is not available. Reinstall sing-box-forkop");
+        die("Binary 'sing-box' is not available. Reinstall sing-box-extended");
     // what the binary reports: a package's version file outlives a binary copied over it
     let binary_version = features.version();
     if (binary_version == "")
-        die("Failed to read the version sing-box reports. Reinstall sing-box-forkop");
+        die("Failed to read the version sing-box reports. Reinstall sing-box-extended");
     if (packages.forkop_core_version(binary_version) == "")
-        die("sing-box " + binary_version + " is not sing-box-forkop, the core Forkop runs on. Install sing-box-forkop");
+        die("sing-box " + binary_version + " is not sing-box-extended, the core Forkop runs on. Install sing-box-extended");
     if (!core_version.version_at_least(binary_version, ctx.sing_box_required_version))
-        die("sing-box-forkop " + binary_version + " is older than the required minimum (" + ctx.sing_box_required_version + "). Update sing-box-forkop");
+        die("sing-box-extended " + binary_version + " is older than the required minimum (" + ctx.sing_box_required_version + "). Update sing-box-extended");
 
     let problem = features.core_problem(ctx.core_tags);
     if (problem != "")
         die(problem);
 
     if (!service_exists("sing-box"))
-        die("Service 'sing-box' is missing. Reinstall sing-box-forkop");
+        die("Service 'sing-box' is missing. Reinstall sing-box-extended");
 
     if (dhcp_has_https_dns_proxy_options("/etc/config/dhcp") === true)
         core_exec.log("warn", "https-dns-proxy is configured in /etc/config/dhcp, and Forkop conflicts with it. Remove https-dns-proxy or its settings in /etc/config/dhcp");

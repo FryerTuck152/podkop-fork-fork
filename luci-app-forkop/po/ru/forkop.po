@@ -2285,8 +2285,8 @@ msgstr "Войти"
 msgid "Sign in with a certificate, alone or together with the login"
 msgstr "Вход по сертификату, отдельно или вместе с логином"
 
-msgid "sing-box %s, not sing-box-forkop"
-msgstr "sing-box %s, а не sing-box-forkop"
+msgid "sing-box %s, not sing-box-extended"
+msgstr "sing-box %s, а не sing-box-extended"
 
 msgid "sing-box Clash API"
 msgstr "Clash API sing-box"
@@ -2297,17 +2297,17 @@ msgstr "sing-box собран без %s"
 msgid "sing-box log level"
 msgstr "Уровень логов sing-box"
 
-msgid "sing-box-forkop %s"
-msgstr "sing-box-forkop %s"
+msgid "sing-box-extended %s"
+msgstr "sing-box-extended %s"
 
-msgid "sing-box-forkop %s (%s)"
-msgstr "sing-box-forkop %s (%s)"
+msgid "sing-box-extended %s (%s)"
+msgstr "sing-box-extended %s (%s)"
 
-msgid "sing-box-forkop %s is outdated: %s or newer is needed"
-msgstr "sing-box-forkop %s устарел: нужен %s или новее"
+msgid "sing-box-extended %s is outdated: %s or newer is needed"
+msgstr "sing-box-extended %s устарел: нужен %s или новее"
 
-msgid "sing-box-forkop is not installed"
-msgstr "sing-box-forkop не установлен"
+msgid "sing-box-extended is not installed"
+msgstr "sing-box-extended не установлен"
 
 msgid "Skipped: Forkop is not running"
 msgstr "Пропущено: Forkop не запущен"

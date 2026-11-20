@@ -10,7 +10,7 @@ type SystemInfo = Pick<
 // "not installed" and one it could not ask as "unknown".
 export function removedPackages(info: SystemInfo): string[] {
   if (!info.loaded) {
-    return ['Forkop', 'sing-box-forkop'];
+    return ['Forkop', 'sing-box-extended'];
   }
   const packages = [
     info.forkop_version ? `Forkop ${info.forkop_version}` : 'Forkop',
@@ -19,7 +19,7 @@ export function removedPackages(info: SystemInfo): string[] {
   if (version === 'not installed') {
     return packages;
   }
-  let core = 'sing-box-forkop';
+  let core = 'sing-box-extended';
   if (version && version !== 'unknown') {
     core += ` ${version}`;
   }

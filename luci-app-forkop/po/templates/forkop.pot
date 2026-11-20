@@ -3178,7 +3178,7 @@ msgid "Sign in with a certificate, alone or together with the login"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/diagnostic/checks/service.ts
-msgid "sing-box %s, not sing-box-forkop"
+msgid "sing-box %s, not sing-box-extended"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/servers/constants.ts
@@ -3194,19 +3194,19 @@ msgid "sing-box log level"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/diagnostic/checks/service.ts
-msgid "sing-box-forkop %s"
+msgid "sing-box-extended %s"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/diagnostic/checks/service.ts
-msgid "sing-box-forkop %s (%s)"
+msgid "sing-box-extended %s (%s)"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/diagnostic/checks/service.ts
-msgid "sing-box-forkop %s is outdated: %s or newer is needed"
+msgid "sing-box-extended %s is outdated: %s or newer is needed"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/diagnostic/checks/service.ts
-msgid "sing-box-forkop is not installed"
+msgid "sing-box-extended is not installed"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/diagnostic/initController.ts

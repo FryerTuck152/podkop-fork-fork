@@ -59,7 +59,7 @@ describe('the service check', () => {
       {
         state: 'success',
         key: 'Core',
-        value: 'sing-box-forkop 1.14.4-r1 (base)',
+        value: 'sing-box-extended 1.14.4-r1 (base)',
       },
       { state: 'success', key: 'Conflicts', value: 'none found' },
       { state: 'success', key: 'Memory', value: '44 MB of 234 MB free' },
@@ -85,7 +85,7 @@ describe('the service check', () => {
     ).toBe('not running');
   });
 
-  it('fails a core that is not sing-box-forkop, an old one, or one Forkop cannot run on', () => {
+  it('fails a core that is not sing-box-extended, an old one, or one Forkop cannot run on', () => {
     const core = (value: Partial<Forkop.ServiceCheckResult['core']>) =>
       presentService(service({ core: { ...service().core, ...value } })).find(
         (item) => item.key === 'Core',
@@ -93,22 +93,22 @@ describe('the service check', () => {
     expect(core({ installed: false, binary: '', version: '' })).toEqual({
       state: 'error',
       key: 'Core',
-      value: 'sing-box-forkop is not installed',
+      value: 'sing-box-extended is not installed',
     });
     expect(
       core({
         binary: '',
         version: '',
         problem:
-          "Failed to read the tags sing-box was built with from 'sing-box version'. Reinstall sing-box-forkop",
+          "Failed to read the tags sing-box was built with from 'sing-box version'. Reinstall sing-box-extended",
       })?.value,
     ).toBe(
-      "Failed to read the tags sing-box was built with from 'sing-box version'. Reinstall sing-box-forkop",
+      "Failed to read the tags sing-box was built with from 'sing-box version'. Reinstall sing-box-extended",
     );
     expect(core({ binary: '1.12.22', version: '', variant: '' })).toEqual({
       state: 'error',
       key: 'Core',
-      value: 'sing-box 1.12.22, not sing-box-forkop',
+      value: 'sing-box 1.12.22, not sing-box-extended',
     });
     expect(
       core({
@@ -121,7 +121,7 @@ describe('the service check', () => {
       state: 'error',
       key: 'Core',
       value:
-        'sing-box-forkop 1.13.18-extended-2.6.5-f165 is outdated: 1.14.4-r1 or newer is needed',
+        'sing-box-extended 1.13.18-extended-2.6.5-f165 is outdated: 1.14.4-r1 or newer is needed',
     });
     expect(
       core({
@@ -137,11 +137,11 @@ describe('the service check', () => {
     expect(
       core({ binary: '1.14.4-r1+2', version: '1.14.4-r1+2', variant: '' })
         ?.value,
-    ).toBe('sing-box-forkop 1.14.4-r1+2');
+    ).toBe('sing-box-extended 1.14.4-r1+2');
     expect(core({})).toEqual({
       state: 'success',
       key: 'Core',
-      value: 'sing-box-forkop 1.14.4-r1 (base)',
+      value: 'sing-box-extended 1.14.4-r1 (base)',
     });
   });
 

@@ -14,7 +14,7 @@ endif
 PKG_VERSION:=$(or $(FORKOP_HAS_RELEASE_VERSION),0.0.0)
 PKG_RELEASE:=
 
-PKG_MAINTAINER:=ushan0v <ushan0v@users.noreply.github.com>
+PKG_MAINTAINER:=FryerTuck152 <251702400+FryerTuck152@users.noreply.github.com>
 PKG_LICENSE:=GPL-2.0-or-later
 
 include $(INCLUDE_DIR)/package.mk
@@ -24,7 +24,7 @@ define Package/forkop
 	CATEGORY:=Network
 	DEPENDS:=+ca-bundle +ucode +ucode-mod-fs +ucode-mod-resolv +ucode-mod-socket +ucode-mod-ubus +ucode-mod-uloop +ucode-mod-uci +uclient-fetch +kmod-nft-tproxy +nftables +kmod-nft-nat +ip-tiny +sing-box
 	TITLE:=Forkop backend service
-	URL:=https://github.com/ushan0v/forkop
+	URL:=https://github.com/FryerTuck152/podkop-fork-fork
 	PKGARCH:=all
 endef
 
