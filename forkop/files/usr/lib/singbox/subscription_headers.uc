@@ -78,19 +78,32 @@ function default_user_agent() {
 }
 
 // The set Happ defined and Remnawave standardised: X-HWID is the one a panel requires, and the
-// device fields are what it shows when a key turns up on a second device.
-function default_header_lines(hwid) {
-    if (hwid == null)
+// device fields are what it shows when a key turns up on a second device. Settings win over what
+// the router reports, and nothing here writes a value back: the config keeps what the user set.
+function default_header_lines(hwid, settings) {
+    settings = settings ?? {};
+
+    let configured = (key) => clean_header_value(settings[key] ?? "");
+    let chosen = (key, fallback) => configured(key) != "" ? configured(key) : fallback;
+
+    if (configured("header_hwid") != "")
+        hwid = configured("header_hwid");
+    else if (hwid == null)
         hwid = generated_hwid();
     else
         hwid = clean_header_value(hwid);
 
     let result = [
-        header_line("User-Agent", default_user_agent()),
-        header_line("X-Device-OS", "OpenWrt Linux"),
-        header_line("X-Device-Model", device_model())
+        header_line("User-Agent", chosen("header_user_agent", default_user_agent())),
+        header_line("X-Device-OS", chosen("header_device_os", "OpenWrt Linux")),
+        header_line("X-Device-Model", chosen("header_device_model", device_model()))
     ];
-    let version = os_version();
+
+    let locale = configured("header_device_locale");
+    if (locale != "")
+        push(result, header_line("X-Device-Locale", locale));
+
+    let version = chosen("header_ver_os", os_version());
     if (version != "")
         push(result, header_line("X-Ver-OS", version));
     if (hwid != "")

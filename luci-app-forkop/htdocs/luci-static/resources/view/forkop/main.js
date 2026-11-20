@@ -139,15 +139,11 @@ function render() {
           [
             textE("b", {}, _("Installed versions")),
             versionRow("Forkop", "components-forkop-version"),
-            versionRow("sing-box-forkop", "components-core-version")
+            versionRow("sing-box-extended", "components-core-version")
           ]
         ),
         textE("div", {
           id: "components-actions",
-          class: "fkp_components-page__block"
-        }),
-        textE("div", {
-          id: "components-config",
           class: "fkp_components-page__block"
         })
       ]),
@@ -903,56 +899,6 @@ function renderFolderOpenIcon24() {
   );
 }
 
-// src/icons/renderLayersIcon24.ts
-function renderLayersIcon24() {
-  const NS = "http://www.w3.org/2000/svg";
-  return svgEl(
-    "svg",
-    {
-      xmlns: NS,
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      "stroke-width": "2",
-      "stroke-linecap": "round",
-      "stroke-linejoin": "round",
-      class: "lucide lucide-layers-icon lucide-layers"
-    },
-    [
-      svgEl("path", {
-        d: "m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"
-      }),
-      svgEl("path", { d: "m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" }),
-      svgEl("path", { d: "m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" })
-    ]
-  );
-}
-
-// src/icons/renderTrashIcon24.ts
-function renderTrashIcon24() {
-  const NS = "http://www.w3.org/2000/svg";
-  return svgEl(
-    "svg",
-    {
-      xmlns: NS,
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      "stroke-width": "2",
-      "stroke-linecap": "round",
-      "stroke-linejoin": "round",
-      class: "lucide lucide-trash-2-icon lucide-trash-2"
-    },
-    [
-      svgEl("path", { d: "M3 6h18" }),
-      svgEl("path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }),
-      svgEl("path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }),
-      svgEl("line", { x1: "10", x2: "10", y1: "11", y2: "17" }),
-      svgEl("line", { x1: "14", x2: "14", y1: "11", y2: "17" })
-    ]
-  );
-}
-
 // src/icons/renderSquareTerminalIcon24.ts
 function renderSquareTerminalIcon24() {
   const NS = "http://www.w3.org/2000/svg";
@@ -979,58 +925,6 @@ function renderSquareTerminalIcon24() {
         rx: "2",
         ry: "2"
       })
-    ]
-  );
-}
-
-// src/icons/renderFileDownIcon24.ts
-function renderFileDownIcon24() {
-  const NS = "http://www.w3.org/2000/svg";
-  return svgEl(
-    "svg",
-    {
-      xmlns: NS,
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      "stroke-width": "2",
-      "stroke-linecap": "round",
-      "stroke-linejoin": "round",
-      class: "lucide lucide-file-down-icon lucide-file-down"
-    },
-    [
-      svgEl("path", {
-        d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"
-      }),
-      svgEl("path", { d: "M14 2v4a2 2 0 0 0 2 2h4" }),
-      svgEl("path", { d: "M12 18v-6" }),
-      svgEl("path", { d: "m9 15 3 3 3-3" })
-    ]
-  );
-}
-
-// src/icons/renderFileUpIcon24.ts
-function renderFileUpIcon24() {
-  const NS = "http://www.w3.org/2000/svg";
-  return svgEl(
-    "svg",
-    {
-      xmlns: NS,
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      "stroke-width": "2",
-      "stroke-linecap": "round",
-      "stroke-linejoin": "round",
-      class: "lucide lucide-file-up-icon lucide-file-up"
-    },
-    [
-      svgEl("path", {
-        d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"
-      }),
-      svgEl("path", { d: "M14 2v4a2 2 0 0 0 2 2h4" }),
-      svgEl("path", { d: "M12 12v6" }),
-      svgEl("path", { d: "m15 15-3-3-3 3" })
     ]
   );
 }
@@ -3151,163 +3045,6 @@ async function ensureSystemInfo({
   }
 }
 
-// src/forkop/tabs/components/configFile.ts
-var UPLOAD_PATH = "/tmp/forkop-import.conf";
-var MAX_CONFIG_SIZE = 1024 * 1024;
-var COMMAND_TIMEOUT_MS = 6e4;
-function datePart(date) {
-  const pad2 = (value) => `${value}`.padStart(2, "0");
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
-}
-function exportFileName(hostname, date) {
-  const host = hostname.trim().replace(/[^A-Za-z0-9._-]+/g, "_");
-  return `forkop-${host ? `${host}-` : ""}${datePart(date)}.conf`;
-}
-async function routerHostname() {
-  try {
-    await uci.load("system");
-    return `${uci.get_first("system", "system", "hostname") || ""}`;
-  } catch {
-    return "";
-  }
-}
-async function downloadConfig() {
-  const response = await executeShellCommand({
-    command: "/usr/bin/forkop",
-    args: [Forkop.AvailableMethods.SHOW_CONFIG, "raw"],
-    timeout: COMMAND_TIMEOUT_MS
-  });
-  if ((response.code ?? 0) !== 0) {
-    throw new Error(response.stderr || _("Failed to execute"));
-  }
-  downloadFile(
-    response.stdout,
-    exportFileName(await routerHostname(), /* @__PURE__ */ new Date())
-  );
-}
-function configText(text8) {
-  return (text8.charCodeAt(0) === 65279 ? text8.slice(1) : text8).replace(
-    /\r\n/g,
-    "\n"
-  );
-}
-async function uploadConfigText(text8) {
-  const data = new FormData();
-  data.append("sessionid", L.env?.sessionid ?? "");
-  data.append("filename", UPLOAD_PATH);
-  data.append("filedata", new Blob([text8]), "forkop.conf");
-  const response = await fetch(`${L.env?.cgi_base ?? "/cgi-bin"}/cgi-upload`, {
-    method: "POST",
-    body: data
-  });
-  if (!response.ok) {
-    const reason = (await response.text().catch(() => "")).trim();
-    throw new Error(
-      _("Failed to upload the file: %s").format(reason || response.status)
-    );
-  }
-}
-async function runImport(stage, text8) {
-  await uploadConfigText(text8);
-  try {
-    const reply = await callUbus({
-      object: "forkop",
-      method: "import_config",
-      params: { stage },
-      timeoutMs: COMMAND_TIMEOUT_MS,
-      nobatch: true
-    });
-    if (!reply.success) {
-      throw new Error(
-        _("Failed to load the configuration: %s").format(reply.message)
-      );
-    }
-    return reply.data;
-  } finally {
-    await fs.remove(UPLOAD_PATH).catch(() => void 0);
-  }
-}
-var configImportApi = {
-  check: (text8) => runImport(false, text8),
-  stage: (text8) => runImport(true, text8)
-};
-function refusalMessage(refusal) {
-  switch (refusal.reason) {
-    case "unreadable":
-      return _("The file is not a UCI configuration");
-    case "missing":
-      return _("The file is not a Forkop configuration: it names no version");
-    case "invalid":
-      return _(
-        "The file is not a Forkop configuration: its version is not a release number"
-      );
-    case "newer":
-      return _(
-        "The configuration is from Forkop %s, newer than this one: update Forkop first"
-      ).format(refusal.from);
-    case "below_min":
-      return _(
-        "The configuration is from Forkop %s, and Forkop loads configurations from %s on"
-      ).format(refusal.from, refusal.min);
-    case "unknown":
-      return _("No Forkop release wrote configuration version %s").format(
-        refusal.from
-      );
-    case "migration":
-      return _(
-        "The configuration of Forkop %s cannot be brought to %s: %s"
-      ).format(refusal.from, refusal.to, refusal.detail);
-    default:
-      return _("Failed to load the configuration: %s").format(
-        refusal.detail || refusal.reason
-      );
-  }
-}
-function renderImportDialog(fileName2, check, onLoad) {
-  const version = check.from === check.to ? _("%s holds a configuration of Forkop %s.").format(fileName2, check.from) : _(
-    "%s holds a configuration of Forkop %s, which is brought to %s as an update would bring it."
-  ).format(fileName2, check.from, check.to);
-  return [
-    textE("p", {}, version),
-    ...check.warnings.length ? [
-      textE("p", {}, _("What the update changes in it:")),
-      textE(
-        "ul",
-        {},
-        check.warnings.map((warning) => textE("li", {}, warning))
-      )
-    ] : [],
-    textE(
-      "p",
-      {},
-      _(
-        "It replaces the current one through unsaved changes, as if you made them by hand. Forkop runs it once you apply them."
-      )
-    ),
-    ...check.unsaved ? [textE("p", {}, _("Unsaved changes to Forkop made earlier are replaced."))] : [],
-    textE("div", { class: "fkp-partial-modal__footer" }, [
-      textE(
-        "button",
-        {
-          type: "button",
-          class: "btn cbi-button",
-          click: () => ui.hideModal()
-        },
-        _("Cancel")
-      ),
-      textE(
-        "button",
-        {
-          type: "button",
-          class: "btn cbi-button cbi-button-apply",
-          click: ui.createHandlerFn({}, onLoad)
-        },
-        _("Upload")
-      )
-    ])
-  ];
-}
-
 // src/forkop/tabs/components/installerApi.ts
 var INSTALLER_OBJECT = "forkop.installer";
 var START_TIMEOUT_MS = 15e3;
@@ -3686,83 +3423,6 @@ function createInstallerRun(options) {
       readNow();
     }
   };
-}
-
-// src/forkop/tabs/components/removeDialog.ts
-function removedPackages(info) {
-  if (!info.loaded) {
-    return ["Forkop", "sing-box-forkop"];
-  }
-  const packages = [
-    info.forkop_version ? `Forkop ${info.forkop_version}` : "Forkop"
-  ];
-  const version = info.sing_box_version;
-  if (version === "not installed") {
-    return packages;
-  }
-  let core = "sing-box-forkop";
-  if (version && version !== "unknown") {
-    core += ` ${version}`;
-  }
-  if (info.sing_box_variant) {
-    core += ` (${info.sing_box_variant})`;
-  }
-  packages.push(core);
-  return packages;
-}
-function renderRemoveDialog(packages, onRemove) {
-  const keep = textE("input", {
-    type: "checkbox",
-    class: "cbi-input-checkbox"
-  });
-  keep.checked = true;
-  const remove = textE(
-    "button",
-    {
-      type: "button",
-      class: "btn cbi-button cbi-button-negative",
-      click: () => {
-        ui.hideModal();
-        onRemove(!keep.checked);
-      }
-    },
-    _("Remove")
-  );
-  keep.addEventListener(
-    "change",
-    () => remove.replaceChildren(
-      keep.checked ? _("Remove") : _("Remove with settings")
-    )
-  );
-  return [
-    textE(
-      "ul",
-      {},
-      packages.map((name) => textE("li", {}, name))
-    ),
-    textE("div", { class: "fkp-partial-modal__footer" }, [
-      textE("label", { class: "fkp-partial-modal__checkbox" }, [
-        keep,
-        textE(
-          "span",
-          { class: "fkp-partial-modal__checkbox-text" },
-          _("Keep settings")
-        )
-      ]),
-      textE("div", { class: "fkp_components-page__remove-buttons" }, [
-        textE(
-          "button",
-          {
-            type: "button",
-            class: "btn cbi-button",
-            click: () => ui.hideModal()
-          },
-          _("Cancel")
-        ),
-        remove
-      ])
-    ])
-  ];
 }
 
 // src/forkop/tabs/components/runTime.ts
@@ -4308,10 +3968,6 @@ function statusOf(state) {
     text: state.interrupted || state.stopping ? _("interrupted") : _("failed")
   };
 }
-var AFTER_RUN_TEXTS = {
-  reload: () => _("the page reloads"),
-  leave: () => _("going to the LuCI home page")
-};
 function initController() {
   if (controllerInitialized || !pageRoot) {
     return;
@@ -4389,15 +4045,13 @@ function initController() {
       state.exit,
       state.interrupted,
       state.stopping,
-      state.lost,
-      state.after
+      state.lost
     ]);
     if (drawn === runDrawn) {
       return;
     }
     runDrawn = drawn;
     const status = statusOf(state);
-    const after = state.after ? ` \xB7 ${AFTER_RUN_TEXTS[state.after]()}` : "";
     runStatus.className = `fkp_components-page__run-status fkp_components-page__run-status--${status.tone}`;
     runStatus.replaceChildren(
       ...at === null ? [] : [
@@ -4408,7 +4062,7 @@ function initController() {
         )
       ],
       status.icon(),
-      textE("span", {}, status.text + after)
+      textE("span", {}, status.text)
     );
   }
   async function openLog() {
@@ -4435,33 +4089,28 @@ function initController() {
       return;
     }
     actionsDrawn = drawn;
-    const button = (action, icon, text8, classNames, onClick) => renderButton({
-      classNames,
-      icon,
+    const button = (action, text8, onClick) => renderButton({
+      classNames: ["cbi-button-apply"],
+      icon: renderDownloadIcon24,
       text: text8,
       loading: live && state.action === action,
       disabled: blocked,
       onClick
     });
     part(root, "components-actions").replaceChildren(
-      textE("b", {}, _("Available actions")),
       button(
-        "update",
-        renderDownloadIcon24,
-        _("Run the installer"),
-        ["cbi-button-apply"],
-        () => void run.start("update")
+        "update-app",
+        _("Update Forkop"),
+        () => void run.start("update-app")
       ),
-      button("variant", renderLayersIcon24, _("Change the build"), [], () => {
-        void run.start("variant").then(() => terminal.focus());
-      }),
-      button(
-        "uninstall",
-        renderTrashIcon24,
-        _("Remove Forkop"),
-        ["cbi-button-remove"],
-        openRemoveDialog
-      )
+      // The core comes from sing-box-extended's releases, not install.sh's: no button yet.
+      renderButton({
+        classNames: ["cbi-button-apply"],
+        icon: renderDownloadIcon24,
+        text: _("Update core"),
+        disabled: true,
+        onClick: () => void 0
+      })
     );
   }
   function renderVersions() {
@@ -4470,133 +4119,8 @@ function initController() {
     part(root, "components-forkop-version").replaceChildren(
       loaded ? info.forkop_version : ""
     );
-    const core = part(root, "components-core-version");
-    core.replaceChildren(loaded ? info.sing_box_version : "");
-    if (loaded && info.sing_box_variant) {
-      core.append(
-        textE(
-          "span",
-          { class: "fkp_components-page__badge" },
-          info.sing_box_variant
-        )
-      );
-    }
-  }
-  const REFUSAL_TOAST_MS = 8e3;
-  const configFileInput = textE("input", {
-    type: "file",
-    style: "display: none"
-  });
-  configFileInput.addEventListener("change", () => {
-    const file = configFileInput.files?.[0];
-    configFileInput.value = "";
-    if (file) {
-      void uploadConfig(file);
-    }
-  });
-  let configBusy = null;
-  let configDrawn = "";
-  function renderConfig() {
-    const live = Boolean(runState?.starting || runState?.running);
-    const drawn = JSON.stringify([configBusy, live]);
-    if (drawn === configDrawn) {
-      return;
-    }
-    configDrawn = drawn;
-    part(root, "components-config").replaceChildren(
-      textE("b", {}, _("Configuration")),
-      textE("div", { class: "fkp_components-page__config-buttons" }, [
-        renderButton({
-          icon: renderFileDownIcon24,
-          text: _("Download"),
-          loading: configBusy === "download",
-          onClick: () => void saveConfig()
-        }),
-        renderButton({
-          icon: renderFileUpIcon24,
-          text: _("Upload"),
-          loading: configBusy === "upload",
-          // install.sh may replace the configuration under the staged changes
-          disabled: live,
-          onClick: () => configFileInput.click()
-        })
-      ]),
-      configFileInput
-    );
-  }
-  function setConfigBusy(busy) {
-    configBusy = busy;
-    renderConfig();
-  }
-  async function saveConfig() {
-    setConfigBusy("download");
-    try {
-      await downloadConfig();
-    } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        "error"
-      );
-    } finally {
-      setConfigBusy(null);
-    }
-  }
-  async function stageConfig(text8) {
-    const staged = await configImportApi.stage(text8).catch((error) => ({
-      success: false,
-      reason: "staging",
-      to: "",
-      min: "",
-      detail: error instanceof Error ? error.message : String(error)
-    }));
-    if (!staged.success) {
-      ui.hideModal();
-      showToast(refusalMessage(staged), "error", REFUSAL_TOAST_MS);
-      return;
-    }
-    window.location.reload();
-  }
-  async function uploadConfig(file) {
-    if (file.size > MAX_CONFIG_SIZE) {
-      showToast(
-        _("The file is over 1 MB, far larger than a Forkop configuration"),
-        "error"
-      );
-      return;
-    }
-    setConfigBusy("upload");
-    try {
-      const text8 = configText(await file.text());
-      const check = await configImportApi.check(text8);
-      if (!check.success) {
-        showToast(refusalMessage(check), "error", REFUSAL_TOAST_MS);
-      } else if (!check.changed) {
-        showToast(
-          _("Nothing to upload: the file holds the current configuration"),
-          "success"
-        );
-      } else {
-        ui.showModal(
-          _("Upload the configuration?"),
-          renderImportDialog(file.name, check, () => stageConfig(text8))
-        );
-      }
-    } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        "error"
-      );
-    } finally {
-      setConfigBusy(null);
-    }
-  }
-  function openRemoveDialog() {
-    ui.showModal(
-      _("Remove Forkop?"),
-      renderRemoveDialog(
-        removedPackages(store.get().diagnosticsSystemInfo),
-        (purge) => void run.start("uninstall", "", purge)
-      )
+    part(root, "components-core-version").replaceChildren(
+      loaded ? info.sing_box_version : ""
     );
   }
   const run = createInstallerRun({
@@ -4607,20 +4131,12 @@ function initController() {
       runState = state;
       renderRun(state);
       renderActions(state);
-      renderConfig();
     },
     onStartFailed: (message2) => showToast(message2, "error"),
-    onAfterRun: (after) => {
-      if (after === "leave") {
-        window.location.href = L.url("admin");
-      } else {
-        window.location.reload();
-      }
-    }
+    onAfterRun: () => window.location.reload()
   });
   renderRun(run.state);
   renderActions(run.state);
-  renderConfig();
   renderVersions();
   store.subscribeKey("diagnosticsSystemInfo", renderVersions);
   store.subscribeKey("tabService", () => {
@@ -11810,14 +11326,12 @@ fill the column. */
 
 @container (min-width: 480px) {
     .fkp_dashboard-page__content {
-        --dashboard-grid-columns: 2;
         --dashboard-grid-min-width: 180px;
     }
 }
 
 @container (min-width: 750px) {
     .fkp_dashboard-page__content {
-        --dashboard-grid-columns: 4;
         --dashboard-widget-columns: 4;
     }
 }
@@ -29619,6 +29133,37 @@ function addDnsOptions(section2) {
   o.rmempty = false;
 }
 
+// src/forkop/tabs/settings/form/headers.ts
+var HEADER_FIELDS = [
+  ["header_hwid", "X-HWID", ""],
+  ["header_device_os", "X-Device-OS", ""],
+  ["header_ver_os", "X-Ver-OS", ""],
+  ["header_device_model", "X-Device-Model", ""],
+  ["header_device_locale", "X-Device-Locale", ""],
+  ["header_user_agent", "User-Agent", ""]
+];
+function addHeaderOptions(section2) {
+  for (const [option2, header, fallback] of HEADER_FIELDS) {
+    const o = section2.option(
+      form.Value,
+      option2,
+      header,
+      _("Sent with every subscription request unless the subscription sets its own")
+    );
+    o.default = fallback;
+    o.placeholder = fallback || _("automatic");
+    o.rmempty = true;
+    o.write = function(section_id, value) {
+      const normalized = value ? `${value}`.trim() : "";
+      if (normalized.length) {
+        uci.set(FORKOP_UCI_PACKAGE, section_id, option2, normalized);
+      } else {
+        uci.unset(FORKOP_UCI_PACKAGE, section_id, option2);
+      }
+    };
+  }
+}
+
 // src/forkop/tabs/settings/form/network.ts
 function addNetworkOptions(section2) {
   const excludedDevicesOption = section2.option(
@@ -29932,6 +29477,7 @@ function createSettingsContent(section2) {
   addDnsOptions(section2);
   addNetworkOptions(section2);
   addTrafficOptions(section2);
+  addHeaderOptions(section2);
   addUpdateOptions(section2);
   addServiceOptions(section2);
 }

@@ -12,7 +12,7 @@ let lock = require("service.lock");
 
 const OBJECT_NAME = "forkop.installer";
 const SCHEMA = 1;
-const ACTIONS = [ "update", "variant", "uninstall" ];
+const ACTIONS = [ "update", "update-app", "update-core", "variant", "uninstall" ];
 const VARIANTS = [ "base", "full", "tiny" ];
 const LANGUAGES = [ "ru", "en" ];
 // A finished run keeps answering this long, so a page watching it reads the end even when the
@@ -241,6 +241,10 @@ function install_arguments(action, variant, purge, lang) {
         if (variant != "")
             push(argv, variant);
     }
+    else if (action == "update-app")
+        push(argv, "--app");
+    else if (action == "update-core")
+        push(argv, "--core");
     return argv;
 }
 

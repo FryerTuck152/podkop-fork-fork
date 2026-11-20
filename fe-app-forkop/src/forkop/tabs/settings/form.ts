@@ -1,4 +1,5 @@
 import { addDnsOptions } from './form/dns';
+import { addHeaderOptions } from './form/headers';
 import { addNetworkOptions } from './form/network';
 import { addServiceOptions } from './form/service';
 import { addTrafficOptions } from './form/traffic';
@@ -10,6 +11,7 @@ export function createSettingsContent(section: CBISection) {
   addDnsOptions(section);
   addNetworkOptions(section);
   addTrafficOptions(section);
+  addHeaderOptions(section);
   addUpdateOptions(section);
   addServiceOptions(section);
 }

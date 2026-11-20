@@ -314,13 +314,34 @@ function base_config(settings, service_address) {
     };
 }
 
+// The device headers from Settings: every subscription without headers of its own requests them
+// the same way, and an explicit header of the subscription replaces the one of the same name.
+function settings_headers() {
+    let settings = uci_core.get_all(CONFIG_NAME, "settings") ?? {};
+    let parsed = subscription_headers_module.parse_header_lines(
+        subscription_headers_module.default_header_lines(null, settings)
+    );
+    return parsed.valid ? parsed.headers : {};
+}
+
 function subscription_headers(subscription) {
     let parsed = subscription_headers_module.parse_header_lines(
         connections.subscription_headers(subscription)
     );
     if (!parsed.valid)
         runtime_generate_unsupported("invalid subscription request " + parsed.message);
-    return parsed.headers;
+
+    let result = settings_headers();
+    let names = {};
+    for (let name in keys(result))
+        names[lc(name)] = name;
+    for (let name in keys(parsed.headers)) {
+        let replaced = names[lc(name)];
+        if (replaced != null)
+            delete result[replaced];
+        result[name] = parsed.headers[name];
+    }
+    return result;
 }
 
 function regex_escape(value) {

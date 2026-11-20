@@ -47,6 +47,24 @@ t.test("an unknown release sends no X-Ver-OS", () => {
     t.eq(length(keys(parsed.headers)), 4);
 });
 
+t.test("the settings name the device a panel sees and the HWID is never regenerated", () => {
+    let module = headers_module();
+    let parsed = module.parse_header_lines(module.default_header_lines(null, {
+        header_hwid: "11111111-1111-1111-1111-111111111111",
+        header_device_os: "TestOS",
+        header_ver_os: "1.0",
+        header_device_model: "Test Router",
+        header_device_locale: "EN"
+    }));
+    t.ok(parsed.valid);
+    t.eq(parsed.headers["X-HWID"], [ "11111111-1111-1111-1111-111111111111" ]);
+    t.eq(parsed.headers["X-Device-OS"], [ "TestOS" ]);
+    t.eq(parsed.headers["X-Ver-OS"], [ "1.0" ]);
+    t.eq(parsed.headers["X-Device-Model"], [ "Test Router" ]);
+    t.eq(parsed.headers["X-Device-Locale"], [ "EN" ]);
+    t.eq(parsed.headers["User-Agent"], [ "sing-box" ], "an unset User-Agent is still the core's");
+});
+
 t.test("header lines are validated and combined case-insensitively", () => {
     let module = headers_module();
     t.eq(module.parse_header_lines([ "X-A: 1", "x-a: 2" ]).headers, { "X-A": [ "1", "2" ] });

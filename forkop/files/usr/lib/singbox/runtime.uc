@@ -147,6 +147,11 @@ function bound_devices() {
 
 function version() {
     let value = packages.version("sing-box-forkop") || trim(fs.readfile(packages.paths.sing_box_version) ?? "");
+    if (value == "") {
+        // A core no package of Forkop's recorded, such as sing-box-extended: ask the binary.
+        let features = require("singbox.features");
+        value = features.version();
+    }
     return replace(value, /~/g, "-");
 }
 

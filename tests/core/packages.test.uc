@@ -72,7 +72,7 @@ t.test("the sing-box-forkop version is the one the core records, and only a well
 });
 
 t.test("a core release records X.Y.Z-rN and a build between releases X.Y.Z-rN+K", () => {
-    for (let recorded in [ "1.14.4-r1", "1.14.4-r12", "1.14.4-r1+5", "1.14.4-r0+12" ]) {
+    for (let recorded in [ "1.14.3-extended-2.7.3", "1.14.1-rc1-extended-2.7.2-f122", "1.14.4-r1", "1.14.4-r12", "1.14.4-r1+5", "1.14.4-r0+12" ]) {
         fs.writefile(packages.paths.sing_box_version, recorded + "\n");
         t.eq(packages.sing_box_version(), recorded);
     }

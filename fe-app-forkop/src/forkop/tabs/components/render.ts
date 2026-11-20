@@ -10,7 +10,7 @@ function versionRow(name: string, id: string) {
   ]);
 }
 
-// The controls come first, so on a narrow screen the terminal stands below them.
+// Versions first, the update buttons under them, and the installer's output below.
 export function render() {
   pageRoot = E(
     'div',
@@ -26,15 +26,11 @@ export function render() {
           [
             E('b', {}, _('Installed versions')),
             versionRow('Forkop', 'components-forkop-version'),
-            versionRow('sing-box-forkop', 'components-core-version'),
+            versionRow('sing-box-extended', 'components-core-version'),
           ],
         ),
         E('div', {
           id: 'components-actions',
-          class: 'fkp_components-page__block',
-        }),
-        E('div', {
-          id: 'components-config',
           class: 'fkp_components-page__block',
         }),
       ]),

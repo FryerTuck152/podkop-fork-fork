@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: FORKOP\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 14:20+0300\n"
-"PO-Revision-Date: 2026-10-31 14:20+0300\n"
+"POT-Creation-Date: 2026-11-18 22:18+0300\n"
+"PO-Revision-Date: 2026-11-18 22:18+0300\n"
 "Last-Translator: ushan0v\n"
 "Language-Team: none\n"
 "Language: ru\n"
@@ -359,6 +359,9 @@ msgstr "Ключ авторизации"
 msgid "Auto refresh"
 msgstr "Автообновление"
 
+msgid "automatic"
+msgstr "автоматически"
+
 msgid "Availability check for every server"
 msgstr "Проверка доступности каждого сервера"
 
@@ -430,9 +433,6 @@ msgstr "Сертификат"
 
 msgid "Certificate profile"
 msgstr "Профиль сертификатов"
-
-msgid "Change the build"
-msgstr "Сменить сборку"
 
 msgid "Change the HTTP headers of the request"
 msgstr "Изменить HTTP-заголовки запроса"
@@ -1097,9 +1097,6 @@ msgstr "идёт мимо Forkop"
 msgid "goes through Forkop"
 msgstr "идёт через Forkop"
 
-msgid "going to the LuCI home page"
-msgstr "переход на главную LuCI"
-
 msgid "Group name"
 msgstr "Имя группы"
 
@@ -1718,9 +1715,6 @@ msgstr "Не поддерживается этим протоколом"
 msgid "Nothing after %s"
 msgstr "Пусто после %s"
 
-msgid "Nothing to upload: the file holds the current configuration"
-msgstr "Загружать нечего: в файле текущая конфигурация"
-
 msgid "Number or range from 0 to 4294967295"
 msgstr "Число или диапазон от 0 до 4294967295"
 
@@ -1988,12 +1982,6 @@ msgstr "remote: не указан сервер"
 msgid "Remove"
 msgstr "Удалить"
 
-msgid "Remove Forkop"
-msgstr "Удалить Forkop"
-
-msgid "Remove Forkop?"
-msgstr "Удалить Forkop?"
-
 msgid "Remove servers from the selection above"
 msgstr "Убрать серверы из выборки выше"
 
@@ -2108,9 +2096,6 @@ msgstr "Правила"
 msgid "Run Diagnostic"
 msgstr "Запустить диагностику"
 
-msgid "Run the installer"
-msgstr "Запустить установщик"
-
 msgid "running"
 msgstr "работает"
 
@@ -2170,6 +2155,9 @@ msgstr "Самоподписанный"
 
 msgid "Send BitTorrent traffic past the proxy"
 msgstr "Пропускать торрент-трафик мимо прокси"
+
+msgid "Sent with every subscription request unless the subscription sets its own"
+msgstr "Отправляется с каждым запросом подписки, если подписка не задаёт свои"
 
 msgid "Sequential"
 msgstr "Последовательно"
@@ -2495,9 +2483,6 @@ msgstr "Это не конфигурация Forkop: её версия не но
 msgid "The file is not a UCI configuration"
 msgstr "Это не конфигурация UCI"
 
-msgid "The file is over 1 MB, far larger than a Forkop configuration"
-msgstr "Файл больше 1 МБ, а конфигурация Forkop намного меньше"
-
 msgid "The group joins as the single node it has selected"
 msgstr "Группа участвует как один выбранный узел"
 
@@ -2524,9 +2509,6 @@ msgstr "Имя, которое роутер сообщает серверу"
 
 msgid "The name this device appears under in the Tailscale console"
 msgstr "Под этим именем устройство отобразится в консоли"
-
-msgid "the page reloads"
-msgstr "страница перезагрузится"
 
 msgid "The profile connects over IPsec, which OpenConnect does not speak"
 msgstr "Профиль подключается по IPsec, а OpenConnect его не поддерживает"
@@ -2732,6 +2714,12 @@ msgstr "Ссылка не поддерживается"
 msgid "Up to %d characters"
 msgstr "Не длиннее %d символов"
 
+msgid "Update core"
+msgstr "Обновить ядро"
+
+msgid "Update Forkop"
+msgstr "Обновить Forkop"
+
 msgid "Update interval"
 msgstr "Интервал обновления"
 
@@ -2755,9 +2743,6 @@ msgstr "Исходящий"
 
 msgid "Upload"
 msgstr "Загрузить"
-
-msgid "Upload the configuration?"
-msgstr "Загрузить конфигурацию?"
 
 msgid "Uploaded"
 msgstr "Отдано"

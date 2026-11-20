@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: FORKOP\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 16:23+0300\n"
-"PO-Revision-Date: 2026-10-31 16:23+0300\n"
+"POT-Creation-Date: 2026-11-18 22:18+0300\n"
+"PO-Revision-Date: 2026-11-18 22:18+0300\n"
 "Last-Translator: ushan0v <ushanov2204@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -486,11 +486,14 @@ msgstr ""
 msgid "Auto refresh"
 msgstr ""
 
+#: fe-app-forkop/src/forkop/tabs/settings/form/headers.ts
+msgid "automatic"
+msgstr ""
+
 #: fe-app-forkop/src/forkop/tabs/sections/fallback.ts
 msgid "Availability check for every server"
 msgstr ""
 
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
 #: fe-app-forkop/src/forkop/tabs/diagnostic/partials/renderAvailableActions.ts
 msgid "Available actions"
 msgstr ""
@@ -584,10 +587,6 @@ msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/sections/tunnels/openvpnForm.ts
 msgid "Certificate profile"
-msgstr ""
-
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
-msgid "Change the build"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/sections/subscriptions/options.ts
@@ -768,7 +767,6 @@ msgstr ""
 msgid "Config File Path"
 msgstr ""
 
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
 #: fe-app-forkop/src/forkop/tabs/sections/tunnels/dialog.ts
 msgid "Configuration"
 msgstr ""
@@ -1114,7 +1112,6 @@ msgstr ""
 msgid "Downlink"
 msgstr ""
 
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
 #: fe-app-forkop/src/forkop/tabs/logs/initController.ts
 #: fe-app-forkop/src/forkop/tabs/logs/render.ts
 #: fe-app-forkop/src/partials/modal/renderModal.ts
@@ -1530,10 +1527,6 @@ msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/diagnostic/checks/traffic.ts
 msgid "goes through Forkop"
-msgstr ""
-
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
-msgid "going to the LuCI home page"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/sections/fallback.ts
@@ -2386,10 +2379,6 @@ msgstr ""
 msgid "Nothing after %s"
 msgstr ""
 
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
-msgid "Nothing to upload: the file holds the current configuration"
-msgstr ""
-
 #: fe-app-forkop/src/validators/messages.ts
 msgid "Number or range from 0 to 4294967295"
 msgstr ""
@@ -2760,14 +2749,6 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
-msgid "Remove Forkop"
-msgstr ""
-
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
-msgid "Remove Forkop?"
-msgstr ""
-
 #: fe-app-forkop/src/forkop/tabs/sections/serverFilters.ts
 msgid "Remove servers from the selection above"
 msgstr ""
@@ -2927,10 +2908,6 @@ msgstr ""
 msgid "Run Diagnostic"
 msgstr ""
 
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
-msgid "Run the installer"
-msgstr ""
-
 #: fe-app-forkop/src/forkop/helpers/serviceStatusDisplay.ts
 #: fe-app-forkop/src/forkop/tabs/diagnostic/checks/service.ts
 msgid "running"
@@ -3015,6 +2992,10 @@ msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/settings/form/traffic.ts
 msgid "Send BitTorrent traffic past the proxy"
+msgstr ""
+
+#: fe-app-forkop/src/forkop/tabs/settings/form/headers.ts
+msgid "Sent with every subscription request unless the subscription sets its own"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/cbi/dnsServers.ts
@@ -3465,10 +3446,6 @@ msgstr ""
 msgid "The file is not a UCI configuration"
 msgstr ""
 
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
-msgid "The file is over 1 MB, far larger than a Forkop configuration"
-msgstr ""
-
 #: fe-app-forkop/src/forkop/tabs/sections/outboundNames.ts
 msgid "The group joins as the single node it has selected"
 msgstr ""
@@ -3505,10 +3482,6 @@ msgstr ""
 #: fe-app-forkop/src/forkop/tabs/sections/tunnels/dialog.ts
 #: fe-app-forkop/src/forkop/tabs/servers/form/identity.ts
 msgid "The name this device appears under in the Tailscale console"
-msgstr ""
-
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
-msgid "the page reloads"
 msgstr ""
 
 #: fe-app-forkop/src/helpers/parseOpenConnectConfig.ts
@@ -3790,6 +3763,14 @@ msgstr ""
 msgid "Up to %d characters"
 msgstr ""
 
+#: fe-app-forkop/src/forkop/tabs/components/initController.ts
+msgid "Update core"
+msgstr ""
+
+#: fe-app-forkop/src/forkop/tabs/components/initController.ts
+msgid "Update Forkop"
+msgstr ""
+
 #: fe-app-forkop/src/forkop/tabs/sections/subscriptions/options.ts
 msgid "Update interval"
 msgstr ""
@@ -3819,12 +3800,7 @@ msgid "Uplink"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/components/configFile.ts
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
 msgid "Upload"
-msgstr ""
-
-#: fe-app-forkop/src/forkop/tabs/components/initController.ts
-msgid "Upload the configuration?"
 msgstr ""
 
 #: fe-app-forkop/src/forkop/tabs/monitoring/connectionList.ts

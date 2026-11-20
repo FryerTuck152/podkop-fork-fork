@@ -56,10 +56,14 @@ t.test("remote subscriptions become providers carrying their own request profile
         t.eq(remote[key], null, key);
 
     let automatic = q.provider(config, "proxy/sub2");
-    t.eq([ automatic.user_agent, automatic.headers["User-Agent"], automatic.headers["X-HWID"] ], [ null, null, [ "configured-hwid" ] ],
-        "an unset User-Agent is not materialized");
+    t.eq([ automatic.user_agent, automatic.headers["X-HWID"] ], [ null, [ "configured-hwid" ] ],
+        "the settings User-Agent and the subscription's own HWID are what a remote provider sends");
+    t.matches(automatic.headers["User-Agent"][0], /^sing-box/);
+    t.eq(automatic.headers["X-Device-OS"], [ "OpenWrt Linux" ], "the settings device fields fill in what the subscription sets none of");
     t.eq(automatic.update_interval, "1h");
-    t.eq(q.provider(config, "proxy/sub3").headers["X-HWID"], null, "no stored HWID, no header");
+    let defaults_only = q.provider(config, "proxy/sub3");
+    t.ok(length(defaults_only.headers["X-HWID"]) == 1 && defaults_only.headers["X-HWID"][0] != "",
+        "a subscription without headers of its own sends the settings HWID");
 });
 
 t.test("a local subscription is read from its path with remote-only options left out", () => {

@@ -39,7 +39,8 @@ function status() {
 // postinst may start Forkop while the package manager is locked; the version file still
 // proves the core is installed.
 function sing_box_installed() {
-    return packages.installed("sing-box-forkop") || (packages.sing_box_version() != "" && has_command("sing-box"));
+    return packages.installed("sing-box-forkop") || (packages.sing_box_version() != "" && has_command("sing-box")) ||
+        (has_command("sing-box") && singbox_runtime.version() != "");
 }
 
 function luci_app_version() {

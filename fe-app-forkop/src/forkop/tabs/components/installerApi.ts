@@ -6,6 +6,8 @@ import { Forkop } from '../../types';
 export const INSTALLER_OBJECT = 'forkop.installer';
 export const INSTALLER_ACTIONS: readonly Forkop.InstallerAction[] = [
   'update',
+  'update-app',
+  'update-core',
   'variant',
   'uninstall',
 ];

@@ -126,7 +126,7 @@ function capabilities() {
 }
 
 function default_headers() {
-    return subscription_headers.default_header_lines();
+    return subscription_headers.default_header_lines(null, uci.get_all(CONFIG_NAME, "settings") ?? {});
 }
 
 // status is what the service is and busy what is being done to it. Elapsed seconds, not a start

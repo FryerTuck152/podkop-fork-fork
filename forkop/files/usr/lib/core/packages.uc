@@ -94,7 +94,7 @@ function apk_version(name) {
 function forkop_core_version(value) {
     value = trim(value ?? "");
     return match(value, /^[0-9]+\.[0-9]+\.[0-9]+-r[0-9]+(\+[0-9]+)?$/) ||
-        match(value, /^[0-9][0-9A-Za-z._+~-]*-extended-[0-9][0-9A-Za-z._+~-]*-f[0-9]+$/) ||
+        match(value, /^[0-9][0-9A-Za-z._+~-]*-extended-[0-9][0-9A-Za-z._+~-]*(-f[0-9]+)?$/) ||
         match(value, /^[0-9][0-9A-Za-z._+~-]*-forkop[.][0-9]+$/) ? value : "";
 }
 

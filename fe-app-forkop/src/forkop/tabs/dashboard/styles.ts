@@ -46,14 +46,12 @@ fill the column. */
 
 @container (min-width: 480px) {
     .fkp_dashboard-page__content {
-        --dashboard-grid-columns: 2;
         --dashboard-grid-min-width: 180px;
     }
 }
 
 @container (min-width: 750px) {
     .fkp_dashboard-page__content {
-        --dashboard-grid-columns: 4;
         --dashboard-widget-columns: 4;
     }
 }

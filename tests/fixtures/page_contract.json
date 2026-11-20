@@ -389,6 +389,12 @@
   "installer": {
     "object": "forkop.installer",
     "methods": ["input", "read", "stop"],
-    "actions": ["update", "variant", "uninstall"]
+    "actions": [
+      "update",
+      "update-app",
+      "update-core",
+      "variant",
+      "uninstall"
+    ]
   }
 }
